@@ -2,6 +2,16 @@
 import nodemailer from "nodemailer"
 
 export default async function handler(req, res) {
+    // Add CORS headers to handle cross-origin requests
+    res.setHeader("Access-Control-Allow-Origin", "*")
+    res.setHeader("Access-Control-Allow-Methods", "POST")
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type")
+
+    // Handle preflight request
+    if (req.method === "OPTIONS") {
+        return res.status(200).end() // End preflight request
+    }
+
     if (req.method === "POST") {
         const { name, email, message } = req.body
 
@@ -15,20 +25,23 @@ export default async function handler(req, res) {
         })
 
         const mailOptions = {
-            from: email,
-            to: process.env.TO_EMAIL, // Set in Vercel environment variables
+            from: email, // Sender's email address
+            to: process.env.TO_EMAIL, // Your personal email (set in Vercel environment variables)
             subject: `New message from ${name}`,
             text: message,
         }
 
         try {
+            // Send the email
             await transporter.sendMail(mailOptions)
-            res.status(200).json({ message: "Email sent successfully!" })
+            return res.status(200).json({ message: "Email sent successfully!" })
         } catch (error) {
-            res.status(500).json({ message: "Failed to send email", error })
+            console.error("Email sending error:", error) // Log error for debugging
+            return res.status(500).json({ message: "Failed to send email", error: error.toString() })
         }
     } else {
+        // Handle unsupported methods
         res.setHeader("Allow", ["POST"])
-        res.status(405).end(`Method ${req.method} not allowed`)
+        return res.status(405).end(`Method ${req.method} not allowed`)
     }
 }
