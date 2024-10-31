@@ -2,7 +2,8 @@
   "name": "framer-vercel-email-sender",
   "version": "1.0.0",
   "description": "A serverless email sending function for Framer on Vercel",
-  "main": "index.js", // This won't be used directly, but it's needed
+  "main": "index.js",
+  "type": "module",
   "dependencies": {
     "nodemailer": "^6.7.2"
   },
